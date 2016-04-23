@@ -166,3 +166,44 @@ To make an uncontrolled component, `defaultValue` is used instead.
 > Note:
 >
 > You can pass an array into the `value` attribute, allowing you to select multiple options in a `select` tag: `<select multiple={true} value={['B', 'C']}>`.
+
+### Submit form
+
+If you need to programmatically submit a form, you have to obtain a [reference to the DOM node](08.1-more-about-refs.md), and manually call `submit()` on it.
+
+```javascript
+var MyComponent = React.createClass({
+  handleClick: function() {
+    if (this.myForm !== null) {
+      this.myForm.submit();
+    }
+  },
+  render: function() {
+    return (
+      <div>
+        <form href="http://example.com/location" method="post" ref={(ref) => this.myForm = ref}>
+          <input type="hidden" name="Number" value="123456" />
+        </form>
+        <span onClick={this.handleClick}>Click here to submit</span>
+      </div>
+    );
+  }
+});
+```
+
+Note that the semantic way to submit a form is to put a `<button>` of type `submit` within the `<form>`.
+
+```javascript
+var MyComponent = React.createClass({
+  render: function() {
+    return (
+      <div>
+        <form href="http://example.com/location" method="post" ref={(ref) => this.myForm = ref}>
+          <input type="hidden" name="Number" value="123456" />
+          <button type="submit">Click here to submit</button>
+        </form>
+      </div>
+    );
+  }
+});
+```
