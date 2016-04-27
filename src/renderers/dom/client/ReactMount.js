@@ -333,7 +333,7 @@ var ReactMount = {
     ReactBrowserEventEmitter.ensureScrollValueMonitoring();
     var componentInstance = instantiateReactComponent(nextElement);
 
-    if (__DEV__) {
+    if (ReactInstrumentation.debugTool) {
       // Mute future events from the top level wrapper.
       // It is an implementation detail that devtools should not know about.
       componentInstance._debugID = 0;
@@ -354,7 +354,7 @@ var ReactMount = {
     var wrapperID = componentInstance._instance.rootID;
     instancesByReactRootID[wrapperID] = componentInstance;
 
-    if (__DEV__) {
+    if (ReactInstrumentation.debugTool) {
       // The instance here is TopLevelWrapper so we report mount for its child.
       ReactInstrumentation.debugTool.onMountRootComponent(
         componentInstance._renderedComponent._debugID

@@ -248,7 +248,7 @@ function optionPostMount() {
 }
 
 var setContentChildForInstrumentation = emptyFunction;
-if (__DEV__) {
+if (ReactInstrumentation.debugTool) {
   setContentChildForInstrumentation = function(contentToUse) {
     var debugID = this._debugID;
     var contentDebugID = debugID + '#text';
@@ -1025,7 +1025,7 @@ ReactDOMComponent.Mixin = {
       this.updateChildren(null, transaction, context);
     } else if (lastHasContentOrHtml && !nextHasContentOrHtml) {
       this.updateTextContent('');
-      if (__DEV__) {
+      if (ReactInstrumentation.debugTool) {
         ReactInstrumentation.debugTool.onSetChildren(this._debugID, []);
       }
     }
@@ -1033,7 +1033,7 @@ ReactDOMComponent.Mixin = {
     if (nextContent != null) {
       if (lastContent !== nextContent) {
         this.updateTextContent('' + nextContent);
-        if (__DEV__) {
+        if (ReactInstrumentation.debugTool) {
           this._contentDebugID = this._debugID + '#text';
           setContentChildForInstrumentation.call(this, nextContent);
         }
@@ -1042,11 +1042,11 @@ ReactDOMComponent.Mixin = {
       if (lastHtml !== nextHtml) {
         this.updateMarkup('' + nextHtml);
       }
-      if (__DEV__) {
+      if (ReactInstrumentation.debugTool) {
         ReactInstrumentation.debugTool.onSetChildren(this._debugID, []);
       }
     } else if (nextChildren != null) {
-      if (__DEV__) {
+      if (ReactInstrumentation.debugTool) {
         if (this._contentDebugID) {
           ReactInstrumentation.debugTool.onUnmountComponent(this._contentDebugID);
           this._contentDebugID = null;
@@ -1115,9 +1115,11 @@ ReactDOMComponent.Mixin = {
     this._domID = null;
     this._wrapperState = null;
 
-    if (this._contentDebugID) {
-      ReactInstrumentation.debugTool.onUnmountComponent(this._contentDebugID);
-      this._contentDebugID = null;
+    if (ReactInstrumentation.debugTool) {
+      if (this._contentDebugID) {
+        ReactInstrumentation.debugTool.onUnmountComponent(this._contentDebugID);
+        this._contentDebugID = null;
+      }
     }
   },
 

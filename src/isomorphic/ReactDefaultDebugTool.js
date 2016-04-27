@@ -6,38 +6,36 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  *
- * @providesModule ReactDebugTool
+ * @providesModule ReactDefaultDebugTool
  */
 
 'use strict';
 
-var ReactInvalidSetStateWarningDevTool = require('ReactInvalidSetStateWarningDevTool');
+var ReactInvalidSetStateWarningDevtool = require('ReactInvalidSetStateWarningDevtool');
 var warning = require('warning');
 
 var eventHandlers = [];
 var handlerDoesThrowForEvent = {};
 
 function emitEvent(handlerFunctionName, arg1, arg2, arg3, arg4, arg5) {
-  if (__DEV__) {
-    eventHandlers.forEach(function(handler) {
-      try {
-        if (handler[handlerFunctionName]) {
-          handler[handlerFunctionName](arg1, arg2, arg3, arg4, arg5);
-        }
-      } catch (e) {
-        warning(
-          handlerDoesThrowForEvent[handlerFunctionName],
-          'exception thrown by devtool while handling %s: %s',
-          handlerFunctionName,
-          e.message
-        );
-        handlerDoesThrowForEvent[handlerFunctionName] = true;
+  eventHandlers.forEach(function(handler) {
+    try {
+      if (handler[handlerFunctionName]) {
+        handler[handlerFunctionName](arg1, arg2, arg3, arg4, arg5);
       }
-    });
-  }
+    } catch (e) {
+      warning(
+        handlerDoesThrowForEvent[handlerFunctionName],
+        'exception thrown by devtool while handling %s: %s',
+        handlerFunctionName,
+        e.message
+      );
+      handlerDoesThrowForEvent[handlerFunctionName] = true;
+    }
+  });
 }
 
-var ReactDebugTool = {
+var ReactDefaultDebugTool = {
   addDevtool(devtool) {
     eventHandlers.push(devtool);
   },
@@ -87,6 +85,6 @@ var ReactDebugTool = {
   },
 };
 
-ReactDebugTool.addDevtool(ReactInvalidSetStateWarningDevTool);
+ReactDefaultDebugTool.addDevtool(ReactInvalidSetStateWarningDevtool);
 
-module.exports = ReactDebugTool;
+module.exports = ReactDefaultDebugTool;

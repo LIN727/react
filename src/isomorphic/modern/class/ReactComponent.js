@@ -66,8 +66,10 @@ ReactComponent.prototype.setState = function(partialState, callback) {
     'setState(...): takes an object of state variables to update or a ' +
     'function which returns an object of state variables.'
   );
-  if (__DEV__) {
+  if (ReactInstrumentation.debugTool) {
     ReactInstrumentation.debugTool.onSetState();
+  }
+  if (__DEV__) {
     warning(
       partialState != null,
       'setState(...): You passed an undefined or null state object; ' +

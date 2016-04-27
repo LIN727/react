@@ -52,7 +52,7 @@ var ReactReconciler = {
         internalInstance._currentElement.ref != null) {
       transaction.getReactMountReady().enqueue(attachRefs, internalInstance);
     }
-    if (__DEV__) {
+    if (ReactInstrumentation.debugTool) {
       if (internalInstance._debugID !== 0) {
         ReactInstrumentation.debugTool.onMountComponent(internalInstance._debugID);
       }
@@ -77,7 +77,7 @@ var ReactReconciler = {
   unmountComponent: function(internalInstance, safely) {
     ReactRef.detachRefs(internalInstance, internalInstance._currentElement);
     internalInstance.unmountComponent(safely);
-    if (__DEV__) {
+    if (ReactInstrumentation.debugTool) {
       if (internalInstance._debugID !== 0) {
         ReactInstrumentation.debugTool.onUnmountComponent(internalInstance._debugID);
       }
@@ -131,7 +131,7 @@ var ReactReconciler = {
       transaction.getReactMountReady().enqueue(attachRefs, internalInstance);
     }
 
-    if (__DEV__) {
+    if (ReactInstrumentation.debugTool) {
       if (internalInstance._debugID !== 0) {
         ReactInstrumentation.debugTool.onUpdateComponent(internalInstance._debugID);
       }
@@ -150,7 +150,7 @@ var ReactReconciler = {
     transaction
   ) {
     internalInstance.performUpdateIfNecessary(transaction);
-    if (__DEV__) {
+    if (ReactInstrumentation.debugTool) {
       if (internalInstance._debugID !== 0) {
         ReactInstrumentation.debugTool.onUpdateComponent(internalInstance._debugID);
       }

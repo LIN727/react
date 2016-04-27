@@ -67,9 +67,11 @@ Object.assign(ReactDOMTextComponent.prototype, {
     nativeContainerInfo,
     context
   ) {
-    if (__DEV__) {
+    if (ReactInstrumentation.debugTool) {
       ReactInstrumentation.debugTool.onSetText(this._debugID, this._stringText);
+    }
 
+    if (__DEV__) {
       var parentInfo;
       if (nativeParent != null) {
         parentInfo = nativeParent._ancestorInfo;
@@ -144,7 +146,7 @@ Object.assign(ReactDOMTextComponent.prototype, {
           nextStringText
         );
 
-        if (__DEV__) {
+        if (ReactInstrumentation.debugTool) {
           ReactInstrumentation.debugTool.onSetText(this._debugID, nextStringText);
         }
       }

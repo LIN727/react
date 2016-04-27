@@ -6,25 +6,22 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  *
- * @providesModule ReactInvalidSetStateWarningDevTool
+ * @providesModule ReactInvalidSetStateWarningDevtool
  */
 
 'use strict';
 
 var warning = require('warning');
 
-if (__DEV__) {
-  var processingChildContext = false;
+var processingChildContext = false;
+var warnInvalidSetState = function() {
+  warning(
+    !processingChildContext,
+    'setState(...): Cannot call setState() inside getChildContext()'
+  );
+};
 
-  var warnInvalidSetState = function() {
-    warning(
-      !processingChildContext,
-      'setState(...): Cannot call setState() inside getChildContext()'
-    );
-  };
-}
-
-var ReactInvalidSetStateWarningDevTool = {
+var ReactInvalidSetStateWarningDevtool = {
   onBeginProcessingChildContext() {
     processingChildContext = true;
   },
@@ -36,4 +33,4 @@ var ReactInvalidSetStateWarningDevTool = {
   },
 };
 
-module.exports = ReactInvalidSetStateWarningDevTool;
+module.exports = ReactInvalidSetStateWarningDevtool;

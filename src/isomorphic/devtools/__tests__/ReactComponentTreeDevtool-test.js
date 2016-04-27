@@ -13,27 +13,32 @@
 
 describe('ReactComponentTreeDevtool', () => {
   var React;
-  var ReactDebugTool;
   var ReactDOM;
   var ReactDOMServer;
   var ReactInstanceMap;
+  var ReactInstrumentation;
   var ReactComponentTreeDevtool;
 
+  var oldProcess;
+
   beforeEach(() => {
+    oldProcess = global.process;
+    global.process = {env: {NODE_ENV: 'development'}};
     jest.resetModuleRegistry();
 
     React = require('React');
-    ReactDebugTool = require('ReactDebugTool');
     ReactDOM = require('ReactDOM');
     ReactDOMServer = require('ReactDOMServer');
     ReactInstanceMap = require('ReactInstanceMap');
+    ReactInstrumentation = require('ReactInstrumentation');
     ReactComponentTreeDevtool = require('ReactComponentTreeDevtool');
 
-    ReactDebugTool.addDevtool(ReactComponentTreeDevtool);
+    ReactInstrumentation.debugTool.addDevtool(ReactComponentTreeDevtool);
   });
 
   afterEach(() => {
-    ReactDebugTool.removeDevtool(ReactComponentTreeDevtool);
+    global.process = oldProcess;
+    jest.resetModuleRegistry();
   });
 
   function getRootDisplayNames() {

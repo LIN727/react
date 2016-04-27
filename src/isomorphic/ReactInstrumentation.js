@@ -11,6 +11,16 @@
 
 'use strict';
 
-var ReactDebugTool = require('ReactDebugTool');
+var ReactDebugTool = null;
+var __TEST__ = process.env.NODE_ENV === 'test';
+
+if (__DEV__ && !__TEST__) {
+  // It is disabled in production and in tests.
+  // Disabling it in tests lets us be more confident
+  // that no code paths accidentally rely on its existence.
+  // Tests for devtools themselves need to shim
+  // process.env.NODE_ENV to be "development".
+  ReactDebugTool = require('ReactDefaultDebugTool');
+}
 
 module.exports = {debugTool: ReactDebugTool};

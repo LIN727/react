@@ -389,7 +389,7 @@ var ReactCompositeComponentMixin = {
       this._processChildContext(context)
     );
 
-    if (__DEV__) {
+    if (ReactInstrumentation.debugTool) {
       if (this._debugID !== 0) {
         ReactInstrumentation.debugTool.onSetChildren(
           this._debugID,
@@ -515,11 +515,11 @@ var ReactCompositeComponentMixin = {
   _processChildContext: function(currentContext) {
     var Component = this._currentElement.type;
     var inst = this._instance;
-    if (__DEV__) {
+    if (ReactInstrumentation.debugTool) {
       ReactInstrumentation.debugTool.onBeginProcessingChildContext();
     }
     var childContext = inst.getChildContext && inst.getChildContext();
-    if (__DEV__) {
+    if (ReactInstrumentation.debugTool) {
       ReactInstrumentation.debugTool.onEndProcessingChildContext();
     }
     if (childContext) {
@@ -877,7 +877,7 @@ var ReactCompositeComponentMixin = {
         this._processChildContext(context)
       );
 
-      if (__DEV__) {
+      if (ReactInstrumentation.debugTool) {
         if (this._debugID !== 0) {
           ReactInstrumentation.debugTool.onSetChildren(
             this._debugID,

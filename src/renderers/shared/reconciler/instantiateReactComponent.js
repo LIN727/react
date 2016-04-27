@@ -140,7 +140,7 @@ function instantiateReactComponent(node) {
     instance._warnedAboutRefsInRender = false;
   }
 
-  if (__DEV__) {
+  if (ReactInstrumentation.debugTool) {
     var debugID = isEmpty ? 0 : nextDebugID++;
     instance._debugID = debugID;
 

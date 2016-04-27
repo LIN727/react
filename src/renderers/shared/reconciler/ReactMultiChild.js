@@ -140,7 +140,7 @@ function processQueue(inst, updateQueue) {
 }
 
 var setChildrenForInstrumentation = emptyFunction;
-if (__DEV__) {
+if (ReactInstrumentation.debugTool) {
   setChildrenForInstrumentation = function(children) {
     ReactInstrumentation.debugTool.onSetChildren(
       this._debugID,

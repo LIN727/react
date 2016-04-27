@@ -45,7 +45,7 @@ function renderToStringImpl(element, makeStaticMarkup) {
         ReactDOMContainerInfo(),
         emptyObject
       );
-      if (__DEV__) {
+      if (ReactInstrumentation.debugTool) {
         ReactInstrumentation.debugTool.onUnmountComponent(
           componentInstance._debugID
         );
