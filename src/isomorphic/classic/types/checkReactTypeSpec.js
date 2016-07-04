@@ -11,6 +11,7 @@
 
 'use strict';
 
+var ReactComponentTreeDevtool = require('ReactComponentTreeDevtool');
 var ReactPropTypeLocationNames = require('ReactPropTypeLocationNames');
 var ReactPropTypesSecret = require('ReactPropTypesSecret');
 
@@ -73,7 +74,6 @@ function checkReactTypeSpec(typeSpecs, values, location, componentName, element,
         var componentStackInfo = '';
 
         if (__DEV__) {
-          var ReactComponentTreeDevtool = require('ReactComponentTreeDevtool');
           if (debugID !== null) {
             componentStackInfo = ReactComponentTreeDevtool.getStackAddendumByID(debugID);
           } else if (element !== null) {
