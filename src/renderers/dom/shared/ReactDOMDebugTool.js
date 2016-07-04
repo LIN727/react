@@ -66,7 +66,9 @@ var ReactDOMDebugTool = {
   },
 };
 
-ReactDOMDebugTool.addDevtool(ReactDOMUnknownPropertyDevtool);
-ReactDOMDebugTool.addDevtool(ReactDOMNullInputValuePropDevtool);
+if (__DEV__) {
+  ReactDOMDebugTool.addDevtool(ReactDOMUnknownPropertyDevtool);
+  ReactDOMDebugTool.addDevtool(ReactDOMNullInputValuePropDevtool);  
+}
 
 module.exports = ReactDOMDebugTool;
