@@ -517,6 +517,11 @@ var ReactCompositeComponentMixin = {
       renderedElement = this._renderValidatedComponent();
     }
 
+    if (renderedElement === false || renderedElement === null) {
+      this._renderedComponent = null;
+      return null;
+    }
+
     var nodeType = ReactNodeTypes.getType(renderedElement);
     this._renderedNodeType = nodeType;
     var child = this._instantiateReactComponent(
@@ -524,6 +529,7 @@ var ReactCompositeComponentMixin = {
       nodeType !== ReactNodeTypes.EMPTY /* shouldHaveDebugID */
     );
     this._renderedComponent = child;
+
     if (__DEV__) {
       if (child._debugID !== 0 && this._debugID !== 0) {
         ReactInstrumentation.debugTool.onSetParent(
@@ -1031,7 +1037,7 @@ var ReactCompositeComponentMixin = {
    */
   _updateRenderedComponent: function(transaction, context) {
     var prevComponentInstance = this._renderedComponent;
-    var prevRenderedElement = prevComponentInstance._currentElement;
+    var prevRenderedElement = prevComponentInstance && prevComponentInstance._currentElement;
     var nextRenderedElement = this._renderValidatedComponent();
     if (shouldUpdateReactComponent(prevRenderedElement, nextRenderedElement)) {
       ReactReconciler.receiveComponent(
@@ -1041,11 +1047,19 @@ var ReactCompositeComponentMixin = {
         this._processChildContext(context)
       );
     } else {
-      var oldHostNode = ReactReconciler.getHostNode(prevComponentInstance);
-      ReactReconciler.unmountComponent(prevComponentInstance, false);
+      if (prevComponentInstance) {
+        var oldHostNode = ReactReconciler.getHostNode(prevComponentInstance);
+        ReactReconciler.unmountComponent(prevComponentInstance, false);
+      }
 
       var nodeType = ReactNodeTypes.getType(nextRenderedElement);
       this._renderedNodeType = nodeType;
+
+      if (nextRenderedElement === false || nextRenderedElement === null) {
+        this._renderedComponent = null;
+        return;
+      }
+
       var child = this._instantiateReactComponent(
         nextRenderedElement,
         nodeType !== ReactNodeTypes.EMPTY /* shouldHaveDebugID */

@@ -14,7 +14,7 @@
 var React = require('React');
 var ReactTestRenderer = require('ReactTestRenderer');
 
-describe('ReactTestRenderer', function() {
+xdescribe('ReactTestRenderer', function() {
 
   it('renders a simple component', function() {
     function Link() {

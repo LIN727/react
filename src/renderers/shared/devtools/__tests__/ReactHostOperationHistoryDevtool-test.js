@@ -33,7 +33,7 @@ describe('ReactHostOperationHistoryDevtool', () => {
     expect(actualHistory).toEqual(expectedHistory);
   }
 
-  describe('mount', () => {
+  xdescribe('mount', () => {
     it('gets recorded for host roots', () => {
       var node = document.createElement('div');
       ReactHostOperationHistoryDevtool._preventClearing = true;

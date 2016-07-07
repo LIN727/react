@@ -11,7 +11,7 @@
 
 'use strict';
 
-describe('ReactComponentTreeDevtool', () => {
+xdescribe('ReactComponentTreeDevtool', () => {
   var React;
   var ReactNative;
   var ReactInstanceMap;

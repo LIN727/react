@@ -26,7 +26,7 @@ function shouldUpdateReactComponent(prevElement, nextElement) {
   var prevEmpty = prevElement === null || prevElement === false;
   var nextEmpty = nextElement === null || nextElement === false;
   if (prevEmpty || nextEmpty) {
-    return prevEmpty === nextEmpty;
+    return false;
   }
 
   var prevType = typeof prevElement;

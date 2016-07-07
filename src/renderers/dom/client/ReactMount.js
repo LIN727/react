@@ -701,20 +701,24 @@ var ReactMount = {
       while (container.lastChild) {
         container.removeChild(container.lastChild);
       }
-      DOMLazyTree.insertTreeBefore(container, markup, null);
+      if (markup) {
+        DOMLazyTree.insertTreeBefore(container, markup, null);
+      }
     } else {
       setInnerHTML(container, markup);
       ReactDOMComponentTree.precacheNode(instance, container.firstChild);
     }
 
     if (__DEV__) {
-      var hostNode = ReactDOMComponentTree.getInstanceFromNode(container.firstChild);
-      if (hostNode._debugID !== 0) {
-        ReactInstrumentation.debugTool.onHostOperation(
-          hostNode._debugID,
-          'mount',
-          markup.toString()
-        );
+      if (markup) {
+        var hostNode = ReactDOMComponentTree.getInstanceFromNode(container.firstChild);
+        if (hostNode._debugID !== 0) {
+          ReactInstrumentation.debugTool.onHostOperation(
+            hostNode._debugID,
+            'mount',
+            markup.toString()
+          );
+        }
       }
     }
   },

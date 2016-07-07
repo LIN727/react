@@ -86,7 +86,7 @@ function instantiateReactComponent(node, shouldHaveDebugID) {
   var instance;
 
   if (node === null || node === false) {
-    instance = ReactEmptyComponent.create(instantiateReactComponent);
+    throw new Error('no.')
   } else if (typeof node === 'object') {
     var element = node;
     invariant(
