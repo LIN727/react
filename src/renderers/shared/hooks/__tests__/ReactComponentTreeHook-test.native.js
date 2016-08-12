@@ -55,6 +55,14 @@ describe('ReactComponentTreeHook', () => {
     };
   });
 
+  function syncScheduler(callback) {
+    callback({
+      timeRemaining() {
+        return Infinity;
+      },
+    });
+  }
+
   function assertTreeMatches(pairs, options) {
     if (!Array.isArray(pairs[0])) {
       pairs = [pairs];
@@ -80,6 +88,9 @@ describe('ReactComponentTreeHook', () => {
         expect(ReactComponentTreeTestUtils.getRegisteredDisplayNames()).toEqual([]);
       }
     }
+
+    // Purge synchronously for simpler testing.
+    ReactComponentTreeHook._setPurgeScheduler(syncScheduler);
 
     // Mount once, render updates, then unmount.
     // Ensure the tree is correct on every step.

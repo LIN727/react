@@ -30,6 +30,14 @@ describe('ReactComponentTreeHook', () => {
     ReactComponentTreeTestUtils = require('ReactComponentTreeTestUtils');
   });
 
+  function syncScheduler(callback) {
+    callback({
+      timeRemaining() {
+        return Infinity;
+      },
+    });
+  }
+
   function assertTreeMatches(pairs) {
     if (!Array.isArray(pairs[0])) {
       pairs = [pairs];
@@ -56,6 +64,9 @@ describe('ReactComponentTreeHook', () => {
         expect(ReactComponentTreeTestUtils.getRegisteredDisplayNames()).toEqual([]);
       }
     }
+
+    // Purge synchronously for simpler testing.
+    ReactComponentTreeHook._setPurgeScheduler(syncScheduler);
 
     // Mount once, render updates, then unmount.
     // Ensure the tree is correct on every step.
@@ -84,19 +95,26 @@ describe('ReactComponentTreeHook', () => {
 
       // Rendering to string should not produce any entries
       // because ReactDebugTool purges it when the flush ends.
+      // Purge synchronously to enforce cleanup.
+      ReactComponentTreeHook._setPurgeScheduler(syncScheduler);
       ReactDOMServer.renderToString(<Wrapper />);
       expectWrapperTreeToEqual(null);
 
       // To test it, we tell the hook to ignore next purge
       // so the cleanup request by ReactDebugTool is ignored.
       // This lets us make assertions on the actual tree.
-      ReactComponentTreeHook._preventPurging = true;
+      var triggerDelayedPurge;
+      ReactComponentTreeHook._setPurgeScheduler(purge => {
+        triggerDelayedPurge = purge;
+      });
       ReactDOMServer.renderToString(<Wrapper />);
-      ReactComponentTreeHook._preventPurging = false;
       expectWrapperTreeToEqual(expectedTree);
-
-      // Purge manually since we skipped the automatic purge.
-      ReactComponentTreeHook.purgeUnmountedComponents();
+      ReactComponentTreeHook._setPurgeScheduler(syncScheduler);
+      triggerDelayedPurge({
+        timeRemaining() {
+          return Infinity;
+        },
+      });
       expectWrapperTreeToEqual(null);
     });
   }
@@ -1680,6 +1698,77 @@ describe('ReactComponentTreeHook', () => {
       children: [],
       parentID: null,
     }, 'Foo');
+  });
+
+  it('purges unmounted components when idle with requestIdleCallback', () => {
+    var realRequestIdleCallback = global.requestIdleCallback;
+    var pendingCallbacks = [];
+    global.requestIdleCallback = function(cb) {
+      pendingCallbacks.push(cb);
+    };
+
+    try {
+      var node = document.createElement('div');
+      var renderBar = true;
+      var fooInstance;
+      var barInstance;
+
+      class Foo extends React.Component {
+        render() {
+          fooInstance = ReactInstanceMap.get(this);
+          return renderBar ? <Bar /> : null;
+        }
+      }
+
+      class Bar extends React.Component {
+        render() {
+          barInstance = ReactInstanceMap.get(this);
+          return null;
+        }
+      }
+
+      ReactDOM.render(<Foo />, node);
+      ReactComponentTreeTestUtils.expectTree(barInstance._debugID, {
+        displayName: 'Bar',
+        parentDisplayName: 'Foo',
+        parentID: fooInstance._debugID,
+        children: [],
+      }, 'Foo');
+
+      renderBar = false;
+      ReactDOM.render(<Foo />, node);
+      ReactDOM.render(<Foo />, node);
+      ReactComponentTreeTestUtils.expectTree(barInstance._debugID, {
+        displayName: 'Bar',
+        parentDisplayName: 'Foo',
+        parentID: fooInstance._debugID,
+        children: [],
+      }, 'Foo');
+
+      ReactDOM.unmountComponentAtNode(node);
+      ReactComponentTreeTestUtils.expectTree(barInstance._debugID, {
+        displayName: 'Bar',
+        parentDisplayName: 'Foo',
+        parentID: fooInstance._debugID,
+        children: [],
+      }, 'Foo');
+
+      while (pendingCallbacks.length) {
+        var nextCallback = pendingCallbacks.shift();
+        nextCallback({
+          timeRemaining() {
+            return Infinity;
+          },
+        });
+      }
+      ReactComponentTreeTestUtils.expectTree(barInstance._debugID, {
+        displayName: 'Unknown',
+        children: [],
+        parentID: null,
+      }, 'Foo');
+    } finally {
+      global.requestIdleCallback = realRequestIdleCallback;
+    }
   });
 
   it('reports update counts', () => {

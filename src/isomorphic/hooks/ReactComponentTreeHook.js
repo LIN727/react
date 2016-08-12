@@ -15,9 +15,10 @@ var ReactCurrentOwner = require('ReactCurrentOwner');
 
 var invariant = require('invariant');
 var warning = require('warning');
+var performanceNow = require('performanceNow');
 
 var itemByKey = {};
-var unmountedIDs = {};
+var unmountedIDs = [];
 var rootIDs = {};
 
 // Use non-numeric keys to prevent V8 performance issues:
@@ -51,14 +52,54 @@ function create(id, element, parentID) {
   };
 }
 
-function purgeDeep(id) {
+function purge(id) {
   var item = get(id);
-  if (item) {
-    var {childIDs} = item;
-    remove(id);
-    childIDs.forEach(purgeDeep);
+  if (!item) {
+    return null;
+  }
+  remove(id);
+  if (item.childIDs.length) {
+    // Have more work to do
+    return item.childIDs;
+  }
+  return null;
+}
+
+function purgeChunk(stack, deadline) {
+  while (stack.length) {
+    if (deadline.timeRemaining() <= 25) {
+      schedulePurge(nextDeadline => purgeChunk(stack, nextDeadline));
+      return;
+    }
+    var frame = stack[stack.length - 1];
+    var nextID = frame.pop();
+    if (!frame.length) {
+      stack.pop();
+    }
+    var childIDs = purge(nextID);
+    if (childIDs) {
+      stack.push(childIDs);
+    }
   }
 }
+
+function scheduleTreePurge(ids) {
+  schedulePurge(deadline => purgeChunk([ids], deadline));
+}
+
+var schedulePurge = function(callback) {
+  if (typeof requestIdleCallback === 'function') {
+    /* global requestIdleCallback */
+    requestIdleCallback(callback);
+  } else {
+    // If unsupported, just do the work synchronously.
+    callback({
+      timeRemaining() {
+        return Infinity;
+      },
+    });
+  }
+};
 
 function describeComponentFrame(name, source, ownerName) {
   return '\n    in ' + name + (
@@ -101,6 +142,11 @@ function describeID(id) {
 }
 
 var ReactComponentTreeHook = {
+  // Useful for testing.
+  _setPurgeScheduler(injectedSchedulePurge) {
+    schedulePurge = injectedSchedulePurge;
+  },
+
   onSetChildren(id, nextChildIDs) {
     var item = get(id);
     item.childIDs = nextChildIDs;
@@ -185,20 +231,16 @@ var ReactComponentTreeHook = {
       // the error boundary cleanup.
       item.isMounted = false;
     }
-    unmountedIDs[id] = true;
+    unmountedIDs.push(id);
     delete rootIDs[id];
   },
 
   purgeUnmountedComponents() {
-    if (ReactComponentTreeHook._preventPurging) {
-      // Should only be used for testing.
-      return;
+    var ids = unmountedIDs;
+    if (ids.length) {
+      unmountedIDs = [];
+      scheduleTreePurge(ids);
     }
-
-    for (var id in unmountedIDs) {
-      purgeDeep(id);
-    }
-    unmountedIDs = {};
   },
 
   isMounted(id) {
