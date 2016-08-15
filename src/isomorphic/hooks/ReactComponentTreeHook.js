@@ -14,7 +14,6 @@
 var ReactCurrentOwner = require('ReactCurrentOwner');
 
 var invariant = require('invariant');
-var warning = require('warning');
 
 function isNative(fn) {
   // Based on isNative() from Lodash
@@ -186,19 +185,17 @@ function getDisplayName(element) {
 }
 
 function describeID(id) {
-  var name = ReactComponentTreeHook.getDisplayName(id);
   var element = ReactComponentTreeHook.getElement(id);
+  if (!element) {
+    // Some warnings are asynchronous so the stack may have been evicted by now.
+    return null;
+  }
+  var name = ReactComponentTreeHook.getDisplayName(id);
   var ownerID = ReactComponentTreeHook.getOwnerID(id);
   var ownerName;
   if (ownerID) {
     ownerName = ReactComponentTreeHook.getDisplayName(ownerID);
   }
-  warning(
-    element,
-    'ReactComponentTreeHook: Missing React element for debugID %s when ' +
-    'building stack',
-    id
-  );
   return describeComponentFrame(name, element && element._source, ownerName);
 }
 
@@ -337,7 +334,11 @@ var ReactComponentTreeHook = {
   getStackAddendumByID(id) {
     var info = '';
     while (id) {
-      info += describeID(id);
+      var description = describeID(id);
+      if (!description) {
+        break;
+      }
+      info += description;
       id = ReactComponentTreeHook.getParentID(id);
     }
     return info;

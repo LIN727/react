@@ -18,6 +18,7 @@
 
 'use strict';
 
+var ExecutionEnvironment = require('ExecutionEnvironment');
 var ReactCurrentOwner = require('ReactCurrentOwner');
 var ReactComponentTreeHook = require('ReactComponentTreeHook');
 var ReactElement = require('ReactElement');
@@ -169,7 +170,7 @@ function validatePropTypes(element) {
       ReactPropTypeLocations.prop,
       name,
       element,
-      null
+      0
     );
   }
   if (typeof componentClass.getDefaultProps === 'function') {
@@ -178,6 +179,44 @@ function validatePropTypes(element) {
       'getDefaultProps is only used on classic React.createClass ' +
       'definitions. Use a static property named `defaultProps` instead.'
     );
+  }
+}
+
+var elementsPendingValidation = [];
+var isValidationScheduled = false;
+
+function scheduleValidatePropTypes(element) {
+  if (element != null) {
+    elementsPendingValidation.push(element);
+  }
+
+  var canValidateAsynchronously =
+    ExecutionEnvironment.canUseDOM &&
+    typeof window.requestIdleCallback === 'function';
+
+  if (!canValidateAsynchronously) {
+    validatePendingElements({
+      timeRemaining: () => Infinity,
+    });
+    return;
+  }
+
+  if (!isValidationScheduled) {
+    isValidationScheduled = true;
+    window.requestIdleCallback(validatePendingElements, {timeout: 10 * 1000});
+  }
+}
+
+function validatePendingElements(deadline) {
+  isValidationScheduled = false;
+
+  while (elementsPendingValidation.length && deadline.timeRemaining() > 10) {
+    var nextElement = elementsPendingValidation.pop();
+    validatePropTypes(nextElement);
+  }
+
+  if (elementsPendingValidation.length) {
+    scheduleValidatePropTypes();
   }
 }
 
@@ -217,8 +256,7 @@ var ReactElementValidator = {
       }
     }
 
-    validatePropTypes(element);
-
+    scheduleValidatePropTypes(element);
     return element;
   },
 
@@ -262,7 +300,7 @@ var ReactElementValidator = {
     for (var i = 2; i < arguments.length; i++) {
       validateChildKeys(arguments[i], newElement.type);
     }
-    validatePropTypes(newElement);
+    scheduleValidatePropTypes(newElement);
     return newElement;
   },
 
