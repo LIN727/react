@@ -119,6 +119,7 @@ function checkDebugID(debugID, allowRoot = false) {
 }
 
 function beginLifeCycleTimer(debugID, timerType) {
+  console.log('begin timer', debugID, timerType)
   if (currentFlushNesting === 0) {
     return;
   }
@@ -137,10 +138,12 @@ function beginLifeCycleTimer(debugID, timerType) {
   currentTimerStartTime = performanceNow();
   currentTimerNestedFlushDuration = 0;
   currentTimerDebugID = debugID;
+  console.log('setting currentTimerType to', timerType)
   currentTimerType = timerType;
 }
 
 function endLifeCycleTimer(debugID, timerType) {
+  console.log('end timer', debugID, timerType)
   if (currentFlushNesting === 0) {
     return;
   }
@@ -166,6 +169,7 @@ function endLifeCycleTimer(debugID, timerType) {
   currentTimerStartTime = null;
   currentTimerNestedFlushDuration = null;
   currentTimerDebugID = null;
+  console.log('setting currentTimerType to null')
   currentTimerType = null;
 }
 
@@ -180,6 +184,7 @@ function pauseCurrentLifeCycleTimer() {
   currentTimerStartTime = null;
   currentTimerNestedFlushDuration = null;
   currentTimerDebugID = null;
+  console.log('setting currentTimerType to null')
   currentTimerType = null;
 }
 
@@ -190,6 +195,7 @@ function resumeCurrentLifeCycleTimer() {
   currentTimerNestedFlushDuration += nestedFlushDuration;
   currentTimerDebugID = debugID;
   currentTimerType = timerType;
+  console.log('setting currentTimerType to', timerType)
 }
 
 var ReactDebugTool = {
@@ -230,12 +236,14 @@ var ReactDebugTool = {
     return flushHistory;
   },
   onBeginFlush() {
+    console.log('onBeginFlush')
     currentFlushNesting++;
     resetMeasurements();
     pauseCurrentLifeCycleTimer();
     emitEvent('onBeginFlush');
   },
   onEndFlush() {
+    console.log('onEndFlush')
     resetMeasurements();
     currentFlushNesting--;
     resumeCurrentLifeCycleTimer();

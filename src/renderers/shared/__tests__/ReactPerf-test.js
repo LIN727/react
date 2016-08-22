@@ -516,4 +516,29 @@ describe('ReactPerf', function() {
       renderCount: 2,
     }]);
   });
+
+  fit('should not print errant warnings if render() throws', () => {
+    var container = document.createElement('div');
+    class Evil extends React.Component {
+      componentWillUnmount() {}
+      render() {
+        if (this.props.throw) {
+          throw new Error('Muhaha');
+        }
+        return <div />;
+      }
+    }
+    ReactPerf.start();
+    ReactDOM.render(<Evil throw={false} />, container);
+    try {
+      ReactDOM.render(<Evil throw={true} />, container);
+    } catch (err) {
+      if (err.message !== 'Muhaha') {
+        throw err;
+      }
+    }
+//    ReactDOM.render(<Evil throw={false} />, container);
+    ReactDOM.unmountComponentAtNode(container);
+    ReactPerf.stop();
+  });
 });
